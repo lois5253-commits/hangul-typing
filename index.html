@@ -707,22 +707,31 @@ function checkQuiz(){
 }
 }
  </script>
-
+  
+<h1 style="color:white;">퀴즈 시작</h1>
 <div class="card" id="quizBox">
   <h2>🎮 낱말 퀴즈 게임</h2>
   <p id="quizQuestion">퀴즈 시작 버튼을 눌러주세요.</p>
 
   <div id="quizChoices"></div>
 
-  <input id="quizInput" placeholder="정답 입력">
+<input id="quizInput" placeholder="정답 입력">
 
-  <button onclick="startQuiz()">
-    퀴즈 시작
-  </button>
+<button onclick="startQuiz()">
+퀴즈 시작
+</button>
 
-  <button onclick="checkQuiz()" id="answerBtn">
-    정답 확인
-  </button>
+<button onclick="checkQuiz()" id="answerBtn">
+정답 확인
+</button>
 
-  <p id="quizResult"></p>
-  <h3 id="quizScore">점수: 0</h3>
+<p id="quizResult"></p>
+
+<h3 id="quizScore">
+점수: 0
+</h3>
+
+</div>
+
+</body>
+</html>
