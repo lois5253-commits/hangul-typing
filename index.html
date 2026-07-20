@@ -521,6 +521,193 @@ buildLevelNav();
 buildKeyboard();
 render();
 setInterval(render, 1000); // CPM 실시간 갱신
+  /* ---------------- 낱말 퀴즈 게임 ---------------- */
+
+const quizzes = [
+{
+ type:"ox",
+ q:"어리석다는 똑똑하지 못하고 생각이 부족하다는 뜻이다.",
+ answer:"O"
+},
+{
+ type:"ox",
+ q:"용감하다는 무서워서 아무것도 하지 못한다는 뜻이다.",
+ answer:"X"
+},
+{
+ type:"ox",
+ q:"신중하다는 조심스럽게 생각하고 행동한다는 뜻이다.",
+ answer:"O"
+},
+
+{
+ type:"choice",
+ q:"부지런하다의 뜻은?",
+ choices:[
+ "게으르게 행동하다",
+ "열심히 노력하다",
+ "화를 많이 내다",
+ "잠만 자다"
+ ],
+ answer:1
+},
+
+{
+ type:"choice",
+ q:"친절하다와 가장 가까운 뜻은?",
+ choices:[
+ "다른 사람에게 따뜻하게 대하다",
+ "자기 생각만 하다",
+ "약속을 어기다",
+ "화를 내다"
+ ],
+ answer:0
+},
+
+{
+ type:"choice",
+ q:"소중하다의 뜻은?",
+ choices:[
+ "필요 없는 것",
+ "중요하고 귀하게 여기는 것",
+ "버리고 싶은 것",
+ "잊어버리는 것"
+ ],
+ answer:1
+},
+
+{
+ type:"short",
+ q:"한글을 만든 왕의 이름은?",
+ answer:"세종대왕"
+},
+
+{
+ type:"short",
+ q:"컴퓨터에서 글자를 입력하는 장치는?",
+ answer:"키보드"
+},
+
+{
+ type:"long",
+ q:"다음 문장을 입력하세요.\n\n친절한 마음은 다른 사람을 기쁘게 하고 좋은 관계를 만드는 데 도움이 됩니다.",
+ answer:"친절한 마음은 다른 사람을 기쁘게 하고 좋은 관계를 만드는 데 도움이 됩니다."
+}
+];
+
+
+let quizIndex=0;
+let quizScore=0;
+
+
+function startQuiz(){
+ quizIndex=0;
+ quizScore=0;
+ showQuiz();
+}
+
+
+function showQuiz(){
+
+ let quiz=quizzes[quizIndex];
+
+ document.getElementById("quizQuestion").innerText =
+ `${quizIndex+1}번 문제\n${quiz.q}`;
+
+ let choices=document.getElementById("quizChoices");
+ let input=document.getElementById("quizInput");
+ let btn=document.getElementById("answerBtn");
+
+ choices.innerHTML="";
+ input.style.display="none";
+ btn.style.display="none";
+
+
+ if(quiz.type==="ox"){
+
+   ["O","X"].forEach(x=>{
+    let b=document.createElement("button");
+    b.innerText=x;
+    b.onclick=()=>selectAnswer(x);
+    choices.appendChild(b);
+   });
+
+ }
+
+
+ else if(quiz.type==="choice"){
+
+   quiz.choices.forEach((c,i)=>{
+    let b=document.createElement("button");
+    b.innerText=`${i+1}. ${c}`;
+    b.onclick=()=>selectAnswer(i);
+    choices.appendChild(b);
+   });
+
+ }
+
+
+ else{
+
+   input.style.display="block";
+   btn.style.display="inline-block";
+
+ }
+
+}
+
+
+let selectedAnswer=null;
+
+
+function selectAnswer(a){
+ selectedAnswer=a;
+ checkQuiz();
+}
+
+
+function checkQuiz(){
+
+ let quiz=quizzes[quizIndex];
+
+ let userAnswer=
+ selectedAnswer!==null ?
+ selectedAnswer :
+ document.getElementById("quizInput").value.trim();
+
+
+ if(userAnswer==quiz.answer){
+   quizScore+=10;
+   document.getElementById("quizResult").innerText="🎉 정답입니다!";
+ }
+ else{
+   document.getElementById("quizResult").innerText=
+   "아쉽네요! 다시 도전해 보세요.";
+ }
+
+
+ selectedAnswer=null;
+ document.getElementById("quizInput").value="";
+
+
+ quizIndex++;
+
+ if(quizIndex<quizzes.length){
+
+  setTimeout(showQuiz,800);
+
+ }
+ else{
+
+ document.getElementById("quizQuestion").innerText=
+ "🎊 퀴즈 완료!";
+
+ document.getElementById("quizScore").innerText=
+ `최종 점수 : ${quizScore}점 / 90점`;
+
+ }
+
+}
 </script>
 </body>
 </html>
