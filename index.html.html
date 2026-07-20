@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>한글 타자 연습</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700;900&family=Noto+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root{
+  --bg:#14181c;
+  --surface:#1c2227;
+  --surface2:#242b31;
+  --border:#323b41;
+  --accent:#b6402f;      /* 인주 - 도장 붉은빛 */
+  --accent-soft:#7a2c22;
+  --brass:#c9a15b;       /* 놋쇠 */
+  --success:#5a9a78;
+  --error:#c0503f;
+  --text:#ece3d2;
+  --text-muted:#8b93a0;
+  --text-faint:#565f66;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 15% -10%, #232b30 0%, transparent 45%),
+    radial-gradient(circle at 100% 0%, #221b19 0%, transparent 40%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Noto Sans KR',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.app{max-width:920px;margin:0 auto;padding:36px 20px 72px;}
+
+/* header */
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;letter-spacing:.18em;color:var(--brass);
+  text-transform:uppercase;margin-bottom:10px;
+}
+h1{
+  font-family:'Noto Serif KR',serif;
+  font-weight:900;font-size:clamp(28px,5vw,42px);
+  margin:0 0 8px;line-height:1.25;
+  color:var(--text);
+}
+h1 span{color:var(--accent);}
+.subtitle{color:var(--text-muted);font-size:15px;line-height:1.6;max-width:560px;margin-bottom:28px;}
+
+/* level nav */
+.levels{
+  display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:24px;
+  scrollbar-width:thin;
+}
+.level-btn{
+  flex:0 0 auto;
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--text-muted);
+  padding:10px 16px;border-radius:10px;
+  font-family:'Noto Sans KR',sans-serif;font-size:13.5px;font-weight:500;
+  cursor:pointer;white-space:nowrap;
+  display:flex;align-items:center;gap:8px;
+  transition:border-color .15s, color .15s, background .15s;
+}
+.level-btn .num{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-faint);
+}
+.level-btn:hover{border-color:var(--brass);color:var(--text);}
+.level-btn.active{
+  background:var(--surface2);border-color:var(--brass);color:var(--text);
+}
+.level-btn.active .num{color:var(--brass);}
+
+/* practice card */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:28px 28px 22px;
+  margin-bottom:18px;
+}
+.progress-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.progress-label{font-size:12px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;}
+.progress-track{height:4px;background:var(--surface2);border-radius:2px;flex:1;margin:0 14px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--brass);width:0%;transition:width .3s ease;}
+
+.target-display{
+  text-align:center;padding:18px 10px 26px;
+  font-family:'Noto Serif KR',serif;font-weight:700;
+  font-size:clamp(30px,6vw,46px);
+  letter-spacing:.06em;
+  line-height:1.4;
+}
+.target-display .ch{position:relative;padding:0 2px;color:var(--text-faint);transition:color .12s;}
+.target-display .ch.correct{color:var(--success);}
+.target-display .ch.wrong{color:var(--error);}
+.target-display .ch.current{color:var(--text);}
+.target-display .ch.current::after{
+  content:'';position:absolute;left:8%;right:8%;bottom:-6px;height:3px;
+  background:var(--accent);border-radius:2px;
+}
+
+/* breakdown */
+.breakdown{
+  display:flex;align-items:center;justify-content:center;gap:18px;
+  padding:18px 10px 8px;flex-wrap:wrap;
+}
+.jamo-slots{display:flex;gap:10px;}
+.jamo-slot{
+  width:64px;height:64px;border-radius:12px;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Noto Serif KR',serif;font-weight:700;font-size:24px;
+  color:var(--text-faint);position:relative;
+  transition:border-color .15s, color .15s, background .15s;
+}
+.jamo-slot.filled{color:var(--text);border-color:var(--brass);background:#2a2118;}
+.jamo-slot .tag{
+  position:absolute;bottom:-19px;font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--text-faint);letter-spacing:.05em;
+}
+.equals{font-size:22px;color:var(--text-faint);}
+.stamp{
+  width:78px;height:78px;border-radius:14px;
+  background:var(--accent-soft);border:2px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Noto Serif KR',serif;font-weight:900;font-size:32px;color:#f4e9d8;
+  box-shadow:0 0 0 4px rgba(182,64,47,.12);
+}
+
+/* typed feedback line */
+.typed-line{
+  text-align:center;min-height:22px;margin-top:6px;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text-faint);
+}
+.hint{
+  text-align:center;color:var(--text-faint);font-size:12.5px;margin-top:14px;
+}
+
+/* stats */
+.stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;
+}
+.stat{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;
+}
+.stat .label{font-size:11.5px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;}
+.stat .value{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:24px;color:var(--brass);margin-top:4px;}
+.stat .value small{font-size:13px;color:var(--text-muted);font-weight:500;}
+
+/* keyboard */
+.kb-wrap{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:20px 18px 16px;
+}
+.kb-title{font-size:12px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;letter-spacing:.08em;margin-bottom:12px;text-transform:uppercase;}
+.kb-row{display:flex;justify-content:center;gap:6px;margin-bottom:6px;}
+.key{
+  width:52px;height:56px;border-radius:8px;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;user-select:none;
+  transition:transform .05s, background .1s, border-color .1s;
+}
+.key:active,.key.pressed{transform:translateY(2px);background:var(--accent-soft);border-color:var(--accent);}
+.key .qwerty{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-faint);}
+.key .jamo{font-family:'Noto Serif KR',serif;font-weight:700;font-size:18px;color:var(--text);margin-top:2px;}
+.key .shift-jamo{font-family:'Noto Serif KR',serif;font-size:11px;color:var(--brass);position:absolute;margin-top:-38px;margin-left:30px;}
+.key{position:relative;}
+.key.wide{width:220px;}
+.kb-row.bottom{margin-top:8px;}
+.key.func{background:transparent;border-color:var(--border);}
+.key.func .jamo{font-size:12px;color:var(--text-muted);font-family:'Noto Sans KR',sans-serif;font-weight:500;}
+
+.toast{
+  text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;
+  color:var(--success);min-height:18px;margin-top:10px;opacity:0;transition:opacity .2s;
+}
+.toast.show{opacity:1;}
+
+@media (max-width:600px){
+  .key{width:8.6vw;height:44px;}
+  .key.wide{width:38vw;}
+  .jamo-slot{width:50px;height:50px;font-size:19px;}
+  .stamp{width:60px;height:60px;font-size:24px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="eyebrow">두벌식 · Dubeolsik Hangul</div>
+  <h1>손끝으로 배우는 <span>한글</span></h1>
+  <p class="subtitle">키를 하나씩 누를 때마다 초성·중성·종성이 어떻게 모여 한 글자가 되는지 눈으로 확인하며 연습하세요. 10~18과 단계는 <서울대 한국어 4B> 단어장의 실제 어휘로 구성되어 있어요. 물리 키보드가 없어도 아래 가상 키보드를 클릭해서 연습할 수 있어요.</p>
+
+  <div class="levels" id="levels"></div>
+
+  <div class="card">
+    <div class="progress-row">
+      <span class="progress-label" id="progLabel">1 / 10</span>
+      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+      <span class="progress-label" id="levelLabel">자음</span>
+    </div>
+
+    <div class="target-display" id="targetDisplay"></div>
+
+    <div class="breakdown">
+      <div class="jamo-slots">
+        <div class="jamo-slot" id="slotCho"><span></span><span class="tag">초성</span></div>
+        <div class="jamo-slot" id="slotJung"><span></span><span class="tag">중성</span></div>
+        <div class="jamo-slot" id="slotJong"><span></span><span class="tag">종성</span></div>
+      </div>
+      <div class="equals">=</div>
+      <div class="stamp" id="stampChar"></div>
+    </div>
+
+    <div class="typed-line" id="typedLine">&nbsp;</div>
+    <div class="toast" id="toast">완성! 다음 글자로 넘어갑니다</div>
+    <div class="hint">Backspace로 지우고, 화면 키보드를 클릭하거나 실제 키보드로 직접 입력해보세요</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="label">타수</div><div class="value" id="statCpm">0<small> 타/분</small></div></div>
+    <div class="stat"><div class="label">정확도</div><div class="value" id="statAcc">100<small> %</small></div></div>
+    <div class="stat"><div class="label">완료</div><div class="value" id="statDone">0<small> / 0</small></div></div>
+  </div>
+
+  <div class="kb-wrap">
+    <div class="kb-title">가상 키보드 (두벌식)</div>
+    <div id="keyboard"></div>
+  </div>
+</div>
+
+<script>
+/* ---------------- 두벌식 매핑 ---------------- */
+const KEY_MAP = {
+  q:'ㅂ',w:'ㅈ',e:'ㄷ',r:'ㄱ',t:'ㅅ',y:'ㅛ',u:'ㅕ',i:'ㅑ',o:'ㅐ',p:'ㅔ',
+  a:'ㅁ',s:'ㄴ',d:'ㅇ',f:'ㄹ',g:'ㅎ',h:'ㅗ',j:'ㅓ',k:'ㅏ',l:'ㅣ',
+  z:'ㅋ',x:'ㅌ',c:'ㅊ',v:'ㅍ',b:'ㅠ',n:'ㅜ',m:'ㅡ'
+};
+const SHIFT_MAP = { q:'ㅃ', w:'ㅉ', e:'ㄸ', r:'ㄲ', t:'ㅆ', o:'ㅒ', p:'ㅖ' };
+
+const CHO  = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const JONG = ['', 'ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+const JUNG_MERGE = {'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
+const JONG_MERGE = {'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ'};
+const JONG_SPLIT = {'ㄳ':['ㄱ','ㅅ'],'ㄵ':['ㄴ','ㅈ'],'ㄶ':['ㄴ','ㅎ'],'ㄺ':['ㄹ','ㄱ'],'ㄻ':['ㄹ','ㅁ'],'ㄼ':['ㄹ','ㅂ'],'ㄽ':['ㄹ','ㅅ'],'ㄾ':['ㄹ','ㅌ'],'ㄿ':['ㄹ','ㅍ'],'ㅀ':['ㄹ','ㅎ'],'ㅄ':['ㅂ','ㅅ']};
+
+const isCho  = ch => CHO.includes(ch);
+const isJung = ch => JUNG.includes(ch);
+const isJongValid = ch => ch !== '' && JONG.includes(ch);
+
+class Composer{
+  constructor(){ this.reset(); }
+  reset(){ this.committed=''; this.cho=null; this.jung=null; this.jong=null; }
+  snapshot(){ return {committed:this.committed,cho:this.cho,jung:this.jung,jong:this.jong}; }
+  restore(s){ this.committed=s.committed; this.cho=s.cho; this.jung=s.jung; this.jong=s.jong; }
+  composeCurrent(){
+    if(this.cho===null) return '';
+    if(this.jung===null) return this.cho;
+    const ci=CHO.indexOf(this.cho), ji=JUNG.indexOf(this.jung), ki=this.jong?JONG.indexOf(this.jong):0;
+    return String.fromCharCode(0xAC00+(ci*21+ji)*28+ki);
+  }
+  commitCurrent(){
+    const c=this.composeCurrent();
+    if(c) this.committed+=c;
+    this.cho=null; this.jung=null; this.jong=null;
+  }
+  backspace(){
+    if(this.jong!==null){ this.jong=null; return; }
+    if(this.jung!==null){ this.jung=null; return; }
+    if(this.cho!==null){ this.cho=null; return; }
+    this.committed = this.committed.slice(0,-1);
+  }
+  input(ch){
+    const vowel=isJung(ch), consonant=isCho(ch);
+    if(!vowel && !consonant) return;
+
+    if(this.cho===null){
+      if(consonant){ this.cho=ch; } else { this.committed+=ch; }
+      return;
+    }
+    if(this.jung===null){
+      if(vowel){ this.jung=ch; }
+      else { this.committed+=this.cho; this.cho=ch; }
+      return;
+    }
+    if(this.jong===null){
+      if(vowel){
+        const merged=JUNG_MERGE[this.jung+ch];
+        if(merged){ this.jung=merged; }
+        else { this.commitCurrent(); this.committed+=ch; }
+      } else {
+        if(isJongValid(ch)){ this.jong=ch; }
+        else { this.commitCurrent(); this.cho=ch; }
+      }
+      return;
+    }
+    // jong already set
+    if(vowel){
+      if(JONG_SPLIT[this.jong]){
+        const [first,second]=JONG_SPLIT[this.jong];
+        this.jong=first;
+        this.commitCurrent();
+        this.cho=second; this.jung=ch;
+      } else {
+        const movedCho=this.jong;
+        this.jong=null;
+        this.commitCurrent();
+        this.cho=movedCho; this.jung=ch;
+      }
+    } else {
+      const merged=JONG_MERGE[this.jong+ch];
+      if(merged){ this.jong=merged; }
+      else { this.commitCurrent(); this.cho=ch; }
+    }
+  }
+  fullText(){ return this.committed + this.composeCurrent(); }
+}
+
+/* ---------------- 학습 콘텐츠 ---------------- */
+const LEVELS = [
+  { name:'자음', items:['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'] },
+  { name:'모음', items:['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ','ㅐ','ㅔ'] },
+  { name:'글자 (받침 없음)', items:['가','나','다','라','머','서','오','주','치','키','타','피','호','누'] },
+  { name:'받침 있는 글자', items:['각','난','달','람','밥','상','악','잔','책','콩','팥','한','손','발','문','밤'] },
+  { name:'10과 · 옛날이야기와 신화', items:['어리석다','영리하다','겁이 많다','의리가 있다','욕심이 많다','참을성이 많다','은혜를 갚다','벌을 받다','놀림을 받다','복수를 하다','진열하다','자연스럽다','모범생','모범적이다','철이 없다','완벽하다','자원봉사','이기적이다','챙기다','입장','장만하다','품질','동전','지폐','앙앙','잡아먹다','울음을 그치다','잔뜩','달래다','곶감','강연','등장하다','괴롭히다','나그네','깊다','구멍에 빠지다','꺼내다','절대','제발','소나무','함부로','자르다','황소','깡충깡충','뛰어내리다','무사히','신화','왕','환웅','내려다보다','다스리다','농사짓다','동굴','쑥','마늘','햇빛','캄캄하다','버티다','마침내','세우다','조선','해치','정의로움','상징하다','전설','판단하다','관리','수놓다','상','국회의사당','쌍','상징','아이콘','선정하다','유니콘'] },
+  { name:'11과 · 언어와 생활', items:['유행어를 따라 하다','외래어를 사용하다','욕을 해 대다','줄임말을 써 버릇하다','친근한 느낌이 들다','의사소통이 잘되다','표현이 풍부해지다','대화가 끊기다','오해가 생기다','기분이 상하다','표현력','이해력','어휘력','상상력','기억력','어린아이','거짓말쟁이','도대체','소용이 없다','사라지다','옷차림','정이 많다','입학시험','부정적이다','이성','셀프','흔히','한국식','콩글리쉬','조사','충분히','결과','동영상','기계','굳어지다','굳이','짬짜면','딱','남친','여친','알바','일리가 있다','사생활','노출되다','퍼지다','연결','청소년','심각하다','장난','뇌','이성적이다','통제하다','충동적으로','행동','실시하다','실험','중립적이다','머릿속','여기다','영향을 미치다','당신','여보'] },
+  { name:'12과 · 소중한 환경', items:['환경 오염','대기 오염','수질 오염','토양 오염','폐수','매연','일회용품','지구온난화','이상 기후','보호하다','줄이다','재활용하다','아끼다','낭비하다','버리다','오염되다','중단되다','취소되다','파괴되다','해결되다','제품','붙잡다','덮이다','정전이 되다','전쟁이 나다','사용법','낡다','멀쩡하다','낭비이다','쓰레기 더미','저절로','재활용 센터','쌓아 두다','지저분하다','양','의심하다','강물','비바람','마비되다','캠페인','비닐봉지','장바구니','썩다','자가용','오염시키다','인체','해롭다','성분','숲','온천','주민','시위를 벌이다','생활 하수','식수','환경 단체','흘러 들어가다','케이블카','리조트','북극','생물','두께','빙하','녹다','물개','북극곰','반사하다','흡수하다','남극','해수면','해안 도시','잠기다','수익금','중고품','시민 단체','기증받다','운영하다'] },
+  { name:'13과 · 여행의 즐거움', items:['끝없이 펼쳐지다','줄지어 서 있다','꽃으로 가득하다','빨갛게 물들다','바람에 날리다','가슴이 뻥 뚫리다','기분이 상쾌해지다','머리가 맑아지다','마음이 차분해지다','끝없이','수없이','말없이','밤낮없이','끊임없이','별','반하다','청산도','활짝','풍경','올레길','강원도','설악산','동해안','장면','김빠지다','관람객','진정하다','우체통','무조건','요구하다','여유로움','광화문','돌다리','짐승','조각되다','천록','생동감이 있다','메롱','내밀다','궁궐','근정전','칠조룡','고궁박물관','항구','통영','갈매기','고깃배','명물','충무김밥','꿀빵','미륵산','예술인','소매물도','일출','일몰','여객선','민박집','펜션','오징어무침','무김치','별미','휴양 여행','수학여행','엠티','약자'] },
+  { name:'14과 · 숫자의 세계', items:['조사하다','질문하다','차지하다','응답하다','나타나다','증가하다','감소하다','인상되다','인하되다','늘어나다','줄어들다','오르다','내리다','비율','확률','인상률','환율','경쟁률','쾌활하다','기름값','엄하다','시간 가는 줄 모르다','만만치 않다','씀씀이','인건비','의대','법대','가정','자격증을 따다','돌아다니다','고아원','제대로','안정적이다','조화를 이루다','피하다','현실','반영하다','일반적이다','꼽다','존댓말','웃어른','공경하다','문화재','미인형','미남형','신체 구조','계산하다','배꼽','위치','재다','가로','세로','이상적이다','합창단','구성','소프라노','알토','테너','베이스','포털 사이트','상당수','복수 응답','동그랗다','박자에 맞추다','표시하다'] },
+  { name:'15과 · 동물과 식물', items:['번식하다','진화하다','멸종되다','훈련시키다','학대하다','외로움을 달래다','정서적으로 안정되다','경쟁심','동정심','인내심','애국심','호기심','불경기','유령','애완동물','맞아 주다','배설물','털','짖다','화초','앵무새','먹이','챙겨 주다','베란다','무궁화','국화','자식','노약자','임신부','진돗개','원산지','황색','대담하다','용감하다','집을 지키다','사냥개','발휘하다','충성심','이름이 높다','줄기','과거','다홍색','꽂다','명예롭다','훈장','밥상','닭장','갇히다','알을 낳다','병아리','시각 장애인','맹인 안내견','평생','본능','애완견','고통을 주다','장식등','타조','펭귄','도도새','인도양','모리셔스','차츰','위협하다','비행 능력','포르투갈','평화롭다','위기','마구','항해','신선하다','참고로','바보','모피','서커스','식물원','수족관','해몽','속다'] },
+  { name:'16과 · 과학의 신비', items:['존재하다','원리','이유','관심이 생기다','흥미가 없다','골치가 아프다','신비롭다','불가능하다','불공평하다','불규칙하다','불확실하다','부정확하다','꾸준히','벌','인류','쌍둥이','산모','괴물','외계인','지구인','유지','체중','이어지다','목격하다','타임머신','투명인간','망토','개발하다','뚫다','굴절시키다','운석','투표','선출되다','영양소','운영자','유전','물려받다','전달되다','현상','곱슬머리','직모','우성','혀','말다','형태','신체적','타고나다','보조개','쌍꺼풀','귓불','주근깨','상식','무심코','지나치다','의심하다','욕조','세면대','빠져나가다','빙빙 돌다','적도','기준','구불구불하다','단백질','결합되다','일정하다','유지하다','적용되다','마찰력','신기하다','탄생하다','공상 과학 영화','마우스','감탄하다','터치하다','공상 과학 소설','실감 나다','앙부일구','그림자','자격루','항아리','흘러나오다','시각','종이 울리다'] },
+  { name:'17과 · 만남과 헤어짐', items:['기억이 생생하다','가슴속에 간직하다','좋은 추억으로 남다','세월이 쏜살같다','몰라보게 달라지다','하나도 안 변하다','예전 그대로이다','예전만 못하다','세상이 참 좁다','손꼽아 기다리다','규모','들여다보다','사업가','하긴','삼행시','짓다','이벤트','당첨되다','영화 관람권','고급','식사권','당첨자','최우수','허가','발걸음이 무겁다','과연','맴돌다','미소','긴장을 풀다','대화를 나누다','마음이 놓이다','중간에','포기하다','깜짝 놀라다','말이 안 통하다','헤매다','그저','앞서다','치우다','한여름','그늘','애를 쓰다','눈길','문득','쓸쓸하다','허전하다','서운하다','열중하다','멋지다','씩씩하다','훈련을 받다','이등병','작사','작곡','훈련소','큰절','아쉬움','풀','포기','새롭다','생','열차','기적'] },
+  { name:'18과 · 흥부와 놀부', items:['제비','박','톱','보물','도깨비','내쫓다','열리다','쏟아지다','부러뜨리다','터덜터덜','훨훨','빙빙','주렁주렁','슬근슬근','떠들다','짜증이 나다','추첨','문화 상품권','사진집','마음씨가 고약하다','차지하다','불평 없이','온갖','버럭','뻔뻔하다','마당을 쓸다','형님','오두막집','자루','뜨끈뜨끈하다','굽실거리다','빗자루','밥주걱','뺨','형수님','처마','지붕','다급하다','물다','심다','정성스럽다','싹','통','비단','하루아침에','한걸음에','흥분하다'] }
+];
+
+/* ---------------- 상태 ---------------- */
+let levelIdx = 0;
+let itemIdx = 0;
+let composer = new Composer();
+let history = [];
+let startTime = null;
+let correctCount = 0;
+let mistakeCount = 0;
+let completedInLevel = 0;
+
+/* ---------------- DOM ---------------- */
+const $levels = document.getElementById('levels');
+const $target = document.getElementById('targetDisplay');
+const $typed = document.getElementById('typedLine');
+const $slotCho = document.querySelector('#slotCho span');
+const $slotJung = document.querySelector('#slotJung span');
+const $slotJong = document.querySelector('#slotJong span');
+const $stamp = document.getElementById('stampChar');
+const $progLabel = document.getElementById('progLabel');
+const $levelLabel = document.getElementById('levelLabel');
+const $progFill = document.getElementById('progFill');
+const $statCpm = document.getElementById('statCpm');
+const $statAcc = document.getElementById('statAcc');
+const $statDone = document.getElementById('statDone');
+const $toast = document.getElementById('toast');
+const $keyboard = document.getElementById('keyboard');
+
+function buildLevelNav(){
+  LEVELS.forEach((lv,i)=>{
+    const b=document.createElement('button');
+    b.className='level-btn'+(i===levelIdx?' active':'');
+    b.innerHTML=`<span class="num">0${i+1}</span>${lv.name}`;
+    b.onclick=()=>{ levelIdx=i; itemIdx=0; completedInLevel=0; resetComposer(); render(); updateLevelNav(); };
+    $levels.appendChild(b);
+  });
+}
+function updateLevelNav(){
+  [...$levels.children].forEach((b,i)=>b.classList.toggle('active', i===levelIdx));
+}
+
+const KB_ROWS = [
+  ['q','w','e','r','t','y','u','i','o','p'],
+  ['a','s','d','f','g','h','j','k','l'],
+  ['z','x','c','v','b','n','m']
+];
+function buildKeyboard(){
+  KB_ROWS.forEach(row=>{
+    const div=document.createElement('div');
+    div.className='kb-row';
+    row.forEach(k=>{
+      const key=document.createElement('div');
+      key.className='key'; key.dataset.key=k;
+      const shiftJamo = SHIFT_MAP[k] ? `<span class="shift-jamo">${SHIFT_MAP[k]}</span>` : '';
+      key.innerHTML = `${shiftJamo}<span class="qwerty">${k.toUpperCase()}</span><span class="jamo">${KEY_MAP[k]}</span>`;
+      key.onclick=()=>{ processInput(KEY_MAP[k]); flashKey(k); };
+      div.appendChild(key);
+    });
+    $keyboard.appendChild(div);
+  });
+  const bottom=document.createElement('div');
+  bottom.className='kb-row bottom';
+  const back=document.createElement('div');
+  back.className='key func'; back.innerHTML='<span class="jamo">⌫ 지우기</span>';
+  back.onclick=()=>{ backspace(); flashFunc(back); };
+  const space=document.createElement('div');
+  space.className='key func wide'; space.innerHTML='<span class="jamo">space</span>';
+  space.onclick=()=>{ composer.committed+=' '; render(); flashFunc(space); };
+  bottom.appendChild(back); bottom.appendChild(space);
+  $keyboard.appendChild(bottom);
+}
+function flashKey(k){
+  const el=[...document.querySelectorAll('.key')].find(e=>e.dataset.key===k);
+  if(!el) return;
+  el.classList.add('pressed');
+  setTimeout(()=>el.classList.remove('pressed'),100);
+}
+function flashFunc(el){
+  el.classList.add('pressed'); setTimeout(()=>el.classList.remove('pressed'),100);
+}
+
+/* ---------------- 로직 ---------------- */
+function currentTarget(){ return LEVELS[levelIdx].items[itemIdx]; }
+
+function resetComposer(){
+  composer=new Composer(); history=[]; render();
+}
+
+function processInput(jamo){
+  if(startTime===null) startTime=Date.now();
+  history.push(composer.snapshot());
+  composer.input(jamo);
+  checkCompletion();
+  render();
+}
+function backspace(){
+  if(composer.fullText().length===0) return;
+  history.push(composer.snapshot());
+  composer.backspace();
+  mistakeCount++;
+  render();
+}
+
+function checkCompletion(){
+  const target=currentTarget();
+  const text=composer.fullText();
+  if(text===target){
+    correctCount+=target.length;
+    completedInLevel++;
+    showToast();
+    setTimeout(()=>{
+      itemIdx=(itemIdx+1)%LEVELS[levelIdx].items.length;
+      resetComposer();
+    }, 550);
+  } else if(text.length>=target.length){
+    // 길이는 맞는데 틀렸다면 오타로 카운트 (다음 backspace 유도)
+    mistakeCount++;
+  }
+}
+function showToast(){
+  $toast.classList.add('show');
+  setTimeout(()=>$toast.classList.remove('show'),500);
+}
+
+function render(){
+  const target=currentTarget();
+  const text=composer.fullText();
+
+  // target display
+  $target.innerHTML='';
+  for(let i=0;i<target.length;i++){
+    const span=document.createElement('span');
+    span.className='ch';
+    span.textContent=target[i];
+    if(i<text.length){
+      span.classList.add(text[i]===target[i] ? 'correct' : 'wrong');
+    } else if(i===text.length){
+      span.classList.add('current');
+    }
+    $target.appendChild(span);
+  }
+
+  $typed.textContent = text ? `입력: ${text}` : '\u00A0';
+
+  // breakdown slots
+  $slotCho.textContent = composer.cho || '';
+  $slotJung.textContent = composer.jung || '';
+  $slotJong.textContent = composer.jong || '';
+  document.getElementById('slotCho').classList.toggle('filled', !!composer.cho);
+  document.getElementById('slotJung').classList.toggle('filled', !!composer.jung);
+  document.getElementById('slotJong').classList.toggle('filled', !!composer.jong);
+  $stamp.textContent = composer.composeCurrent() || (composer.cho||'·');
+
+  // progress
+  const total=LEVELS[levelIdx].items.length;
+  $progLabel.textContent = `${itemIdx+1} / ${total}`;
+  $levelLabel.textContent = LEVELS[levelIdx].name;
+  $progFill.style.width = `${((itemIdx)/total)*100}%`;
+
+  // stats
+  const elapsedMin = startTime ? Math.max((Date.now()-startTime)/60000, 1/60) : 1;
+  const cpm = startTime ? Math.round(correctCount/elapsedMin) : 0;
+  const totalTries = correctCount+mistakeCount;
+  const acc = totalTries>0 ? Math.round((correctCount/totalTries)*100) : 100;
+  $statCpm.innerHTML = `${cpm}<small> 타/분</small>`;
+  $statAcc.innerHTML = `${acc}<small> %</small>`;
+  $statDone.innerHTML = `${completedInLevel}<small> / ${total}</small>`;
+}
+
+/* ---------------- 물리 키보드 입력 ---------------- */
+window.addEventListener('keydown', (e)=>{
+  if(e.key==='Backspace'){ e.preventDefault(); backspace(); return; }
+  if(e.key===' '){ e.preventDefault(); composer.committed+=' '; render(); return; }
+  const k = e.key.toLowerCase();
+  if(e.shiftKey && SHIFT_MAP[k]){ processInput(SHIFT_MAP[k]); flashKey(k); return; }
+  if(KEY_MAP[k]){ processInput(KEY_MAP[k]); flashKey(k); return; }
+});
+
+/* ---------------- 초기화 ---------------- */
+buildLevelNav();
+buildKeyboard();
+render();
+setInterval(render, 1000); // CPM 실시간 갱신
+</script>
+</body>
+</html>
