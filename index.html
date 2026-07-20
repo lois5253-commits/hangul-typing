@@ -704,35 +704,25 @@ function checkQuiz(){
 
  document.getElementById("quizScore").innerText=
  `최종 점수 : ${quizScore}점 / 90점`;
-
- }
-
 }
-</script>
-<div class="kb-wrap">
-</div><div class="card" id="quizBox">
+}
+ </script>
+
+<div class="card" id="quizBox">
   <h2>🎮 낱말 퀴즈 게임</h2>
   <p id="quizQuestion">퀴즈 시작 버튼을 눌러주세요.</p>
 
   <div id="quizChoices"></div>
 
-  <input id="quizInput" 
-         style="display:none;padding:10px;width:80%;font-size:16px;"
-         placeholder="정답 입력">
+  <input id="quizInput" placeholder="정답 입력">
 
-  <button onclick="startQuiz()" 
-          style="margin-top:15px;padding:12px 20px;">
+  <button onclick="startQuiz()">
     퀴즈 시작
   </button>
 
-  <button onclick="checkQuiz()" 
-          id="answerBtn"
-          style="display:none;margin-top:15px;padding:12px 20px;">
+  <button onclick="checkQuiz()" id="answerBtn">
     정답 확인
   </button>
 
   <p id="quizResult"></p>
   <h3 id="quizScore">점수: 0</h3>
-</div>
-</body>
-</html>
